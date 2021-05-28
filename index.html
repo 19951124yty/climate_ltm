@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style type="text/css">
+        body, html,#allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=Lmw00oTSKOYgrwagvUoYWjC946Q5lyBV"></script>
+    <title>中国站点级气候数据查询页面</title>
+    <script type="text/javascript" src="station.json"></script>
+</head>
+<body>
+    <h4 style="text-align: center;">中国站点级气候数据查询页面</h4>
+    <div style="text-align: center;font-size: 15px;"> 
+        <a href="http://poles.tpdc.ac.cn/zh-hans/data/52c77e9c-df4a-4e27-8e97-d363fdfce10a/"  align="center" target="_blank" >数据来源</a>
+        <a href="iintroduc.html" target="_blank">页面介绍与作者联系方式</a>
+    </div>
+    <br>
+    <div style="text-align: center;">
+        <span>
+            省份：
+            <select style="font-size: 15px;">
+                <option>请选择省份</option>
+            </select>
+        </span>
+        &nbsp;&nbsp;
+        <span>
+            城市：
+            <select style="font-size: 15px;">
+                <option>请选择城市</option>
+            </select>
+        </span>
+    </div>
+    <div style="text-align: center; color: rgb(141, 148, 155);">
+        <p>站点信息</p>  
+    </div>
+    <div id="allmap" style="width: 100%;height: 450px;"></div>
+</body>
+</html>
+<script type="text/javascript">
+    // GL版命名空间为BMapGL
+    // 按住鼠标右键，修改倾斜角和角度
+	var map = new BMapGL.Map("allmap");    // 创建Map实例
+	map.centerAndZoom(new BMapGL.Point(105, 35), 4);  // 初始化地图,设置中心点坐标和地图级别
+    map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+    var scaleCtrl = new BMapGL.ScaleControl();  // 添加比例尺控件
+    map.addControl(scaleCtrl);
+    var zoomCtrl = new BMapGL.ZoomControl();  // 添加比例尺控件
+    map.addControl(zoomCtrl);
+</script>
