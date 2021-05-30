@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        body, html,#allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=Lmw00oTSKOYgrwagvUoYWjC946Q5lyBV"></script>
+    <title>中国站点级气候数据查询页面</title>
+    <script type="text/javascript" src="station.json"></script>
+</head>
+<body>  
+    <h4 style="text-align: center;">中国站点级气候数据查询页面</h4>
+    <div style="text-align: center;font-size: 15px;"> 
+        <a href="http://poles.tpdc.ac.cn/zh-hans/data/52c77e9c-df4a-4e27-8e97-d363fdfce10a/"  align="center" target="_blank" >数据来源</a>
+        <a href="iintroduc.html" target="_blank">页面介绍与作者联系方式</a>
+    </div>
+    <br>
+    <div style="text-align: center;">
+        <span>
+            省份：
+            <select style="font-size: 15px;width: 90px;" id="shenfen" onchange="getcity()">
+                <option>请选择省份</option>
+            </select>
+        </span>
+        &nbsp;&nbsp;
+        <span>
+            城市：
+            <select style="font-size: 15px;width: 90px;" id="chengshi" onchange="get_station()">
+                <option>请选择城市</option>
+            </select>
+        </span>
+    </div>
+    <div style="text-align: center; color: rgb(141, 148, 155);">
+        <p id="station_mess">站点信息</p>  
+    </div>
+    <div>
+        <span>
+           <div id="allmap" style="width: 100%; height: 350px;"></div> 
+        </span>
+    </div>
+    <!-- <script type="text/javascript" src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=d1025316278284012bee2d43024c1311"></script> -->
+    <script src="https://webapi.amap.com/maps?v=2.0&key=d1025316278284012bee2d43024c1311"></script>
+    <!-- <script src="http://api.map.baidu.com/api?v=2.0&ak=1025316278284012bee2d43024c1311"></script> -->
+</body>
+<script>
+    function getcity ( ){
+        var select_cs=document.getElementById("chengshi");
+        select_cs.options.length=0;
+        var select_sf_index=document.getElementById("shenfen").selectedIndex;
+        var select_sf_value=document.getElementById("shenfen").options[select_sf_index].value;
+        // alert(select_sf_value);
+        var city_arr=station.filter(function(e){return e["省份"]==select_sf_value;});
+        city_name=[];
+        city_lon=[];
+        city_lat=[];
+        city_alt=[];
+        city_id=[];
+        for(var kk=0;kk<city_arr.length;kk=kk+1){
+            city_name.push(city_arr[kk]["站名"]);
+            city_lon.push(city_arr[kk]["lon"]);
+            city_lat.push(city_arr[kk]["lat"]);
+            city_alt.push(city_arr[kk]["alt"]);
+            city_id.push(city_arr[kk]["区站号"]);
+        }
+        
+        map.clearOverlays();        //清除地图覆盖物  
+        var bdary = new BMapGL.Boundary();
+        bdary.get(select_sf_value, function(rs){       //获取行政区域
+                 
+            var count = rs.boundaries.length; //行政区域的点有多少个
+            if (count === 0) {
+                alert('未能获取当前输入行政区域');
+                return ;
+            }
+            var pointArray = [];
+            for (var i = 0; i < count; i++) {
+                var ply = new BMapGL.Polygon(rs.boundaries[i], {strokeWeight: 1.5, strokeColor: "#0000FF",strokeStyle:"dashed",fillColor:"blue",fillOpacity: 0.1}); //建立多边形覆盖物
+                map.addOverlay(ply);  //添加覆盖物
+                pointArray = pointArray.concat(ply.getPath());
+            }    
+            map.setViewport(pointArray);    //调整视野  
+            // addlabel();               
+        });
+
+        for(var pp=0;pp<city_name.length;pp=pp+1){
+            city_pp=city_name[pp];
+            var select_cs=document.getElementById("chengshi");
+            var option=document.createElement("option");
+            option.appendChild(document.createTextNode(city_pp));
+            option.setAttribute("value",city_pp);
+            option.setAttribute("id",city_pp);
+            select_cs.appendChild(option);
+            var marker = new BMapGL.Marker(new BMapGL.Point(city_lon[pp], city_lat[pp]));
+            map.addOverlay(marker);
+        }
+
+
+
+
+    }
+
+    function get_station( ){
+        var select_cs_index=document.getElementById("chengshi").selectedIndex;
+        var select_cs_value=document.getElementById("chengshi").options[select_cs_index].value;
+        cityname=city_name[select_cs_index];
+        citylon=city_lon[select_cs_index];
+        citylat=city_lat[select_cs_index];
+        cityalt=city_alt[select_cs_index];
+        mess=cityname+" "+citylon.toString()+"°E,"+citylat.toString()+"°N"+" "+cityalt+"m";
+        var station_mess=document.getElementById("station_mess");
+        station_mess.innerHTML="";
+        station_mess.innerHTML=mess;
+    }
+
+
+
+</script>
+</html>
+<script type="text/javascript">
+
+    // GL版命名空间为BMapGL
+    // 按住鼠标右键，修改倾斜角和角度
+	var map = new BMapGL.Map("allmap");    // 创建Map实例
+	map.centerAndZoom(new BMapGL.Point(105, 34), 4);  // 初始化地图,设置中心点坐标和地图级别
+    map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+    var scaleCtrl = new BMapGL.ScaleControl();  // 添加比例尺控件
+    map.addControl(scaleCtrl);
+    var zoomCtrl = new BMapGL.ZoomControl();  // 添加比例尺控件
+    map.addControl(zoomCtrl);
+    // map.setMapType(BMAP_EARTH_MAP);
+
+    var province=[]; 
+    for(var ii=0;ii<station.length;ii=ii+1){
+        p=station[ii]["省份"];
+        if(province.indexOf(p)==-1){
+            province.push(p)
+        }
+    }
+    
+    for(var jj=0;jj<province.length;jj=jj+1){
+        p_1=province[jj];
+        var select_sf=document.getElementById("shenfen");
+        var option=document.createElement("option");
+        option.appendChild(document.createTextNode(p_1));
+        option.setAttribute("value",p_1);
+        option.setAttribute("id",p_1);
+        select_sf.appendChild(option);
+    }
+    
+
+</script>
